@@ -1,0 +1,40 @@
+kafka:
+  bootstrap_servers: "kafka:9092"
+  topic: "stock_prices"
+  consumer_group: "stock_consumers"
+
+database:
+  postgres:
+    host: "postgres"
+    port: 5432
+    user: "airflow"
+    password: "${POSTGRES_PASSWORD}"
+    db: "airflow"
+  cassandra:
+    hosts: ["cassandra"]
+    port: 9042
+    keyspace: "market_data"
+    username: "cassandra"
+    password: "cassandra"
+
+models:
+  prophet:
+    daily_seasonality: true
+    yearly_seasonality: true
+    changepoint_prior_scale: 0.05
+  xgboost:
+    n_estimators: 100
+    max_depth: 3
+    learning_rate: 0.1
+    early_stopping_rounds: 10
+
+alerts:
+  threshold_pct: 0.05
+  email_from: "${ALERT_EMAIL_FROM}"
+  email_to: "${ALERT_EMAIL_TO}"
+  smtp_server: "${SMTP_SERVER}"
+  smtp_port: "${SMTP_PORT}"
+
+stocks:
+  symbols: ["AAPL", "GOOGL", "MSFT", "AMZN", "TSLA"]
+  update_interval: 30  # seconds
