@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - stock-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - ./scripts/kafka-init.sh:/kafka-init.sh
+    command: >
+      bash -c "export KAFKA_HEAP_OPTS='-Xmx256M -Xms128M' && 
+               /etc/confluent/docker/run & 
+               sleep 20 && 
+               bash /kafka-init.sh"
+    networks:
+      - stock-network
+
+  spark:
+    image: bitnami/spark:3.5
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./spark_processor:/app
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    networks:
+      - stock-network
+
+  spark-worker:
+    image: bitnami/spark:3.5
+    depends_on:
+      - spark
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+    networks:
+      - stock-network
+
+  cassandra:
+    image: cassandra:4.1
+    hostname: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=StockCluster
+      - CASSANDRA_DC=datacenter1
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /var/lib/cassandra/.ready ] || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - stock-network
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - stock-network
+
+  airflow-webserver:
+    image: apache/airflow:2.7.0
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow_dags:/opt/airflow/dags
+      - ./airflow_logs:/opt/airflow/logs
+    ports:
+      - "8081:8080"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__DAG_DEFAULT_VIEW=graph
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create --username admin --password admin --firstname Admin --lastname Admin --role Admin --email admin@example.com &&
+      airflow webserver
+      "
+    networks:
+      - stock-network
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.0
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow_dags:/opt/airflow/dags
+      - ./airflow_logs:/opt/airflow/logs
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    command: >
+      bash -c "airflow scheduler"
+    networks:
+      - stock-network
+
+  dashboards:
+    build:
+      context: .
+      dockerfile: dashboards/Dockerfile
+    ports:
+      - "8501:8501"
+    depends_on:
+      - kafka
+      - cassandra
+      - postgres
+    volumes:
+      - .:/app # Make sure all projects are available inside the container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - stock-network
+
+volumes:
+  cassandra_data:
+  postgres_data:
+
+networks:
+  stock-network:
+    driver: bridge
