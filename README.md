@@ -31,5 +31,5 @@ gantt
     Streamlit UI             :active,  b1, 2025-08-02, 3d
 
     section Processing
-    Spark Batch Jobs         :         c1, 2025-08-10, 3d
+    Spark Batch Jobs         :done,    c1, 2025-08-7, 3d
     ML Predictions (LSTM)    :         c2, 2025-08-13, 3d
