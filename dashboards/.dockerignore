@@ -1,0 +1,13 @@
+airflow_logs/
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+*.egg-info
+venv/
+*.csv
+*.data
+*.zip
+*.gz

@@ -1,0 +1,214 @@
+/* dashboard/assets/style.css */
+
+/* Base styles */
+:root {
+    --primary: #7a0076;
+    --secondary: #6c757d;
+    --success: #00731b;
+    --danger: #7a0612;
+    --warning: #826306;
+    --info: #17a2b8;
+    --light: #f8f9fa;
+    --dark: #343a40;
+    --white: #ffffff;
+    --gray: #6c757d;
+    --gray-light: #e9ecef;
+}
+
+/* Main container */
+.stApp {
+    background-color: var(--light);
+    color: var(--dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--dark);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+h1 {
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 0.5rem;
+}
+
+/* Sidebar */
+.stSidebar {
+    background-color: var(--white);
+    border-right: 1px solid var(--gray-light);
+    padding: 1.5rem;
+}
+
+.stSidebar .sidebar-content {
+    background-color: transparent;
+}
+
+/* Input widgets */
+.stSelectbox, .stSlider, .stRadio {
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.stButton>button {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 4px;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.stButton>button:hover {
+    background-color: #e03ae0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Dataframes */
+.stDataFrame {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Cards and metrics */
+.stMetric {
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.stMetric label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stMetric div {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+/* Charts */
+.plotly-graph-div {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    margin-bottom: 1.5rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+tr:hover {
+    background-color: rgba(79, 139, 249, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stApp {
+        padding: 0.5rem;
+    }
+    
+    .stSidebar {
+        padding: 0.5rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #c73ae0;
+}
+
+/* Animation for loading */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stAlert, .stDataFrame, .plotly-graph-div {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Tooltip styling */
+.tooltip {
+    background-color: var(--dark) !important;
+    opacity: 0.9 !important;
+    padding: 0.5rem !important;
+    border-radius: 4px !important;
+    font-size: 0.85rem !important;
+}
+
+/* Status indicators */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-up {
+    background-color: var(--success);
+}
+
+.status-down {
+    background-color: var(--danger);
+}
+
+.status-warning {
+    background-color: var(--warning);
+}
